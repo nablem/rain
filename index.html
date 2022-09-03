@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rain</title>
+    <style type="text/css">
+        body {
+            overflow: hidden; /* Hide scrollbars */
+        }
+    </style>
+</head>
+<body>
+<canvas width="4000" height="2000"></canvas>
+</body>
+<script type="text/javascript">
+    function getRandomInt(min, max) { min=Math.ceil(min);max=Math.floor(max);return Math.floor(Math.random()*(max-min+1))+ min; }
+
+    let cs = document.querySelector("canvas");
+    let ctx = cs.getContext("2d");
+
+    const NB_COLUMNS = 100;
+    const STEP = cs.width / NB_COLUMNS;
+
+    class Drop {
+        static SPEED = { interval: 10, dy: 2 };
+        static MAX_HEIGHT = 50;
+        static MAX_WIDTH = 5;
+        static MAX_SPACE = 60;
+        static LINE_TOP_MARGIN = 1;
+
+        static generate(column, center, x, ctx) {
+            let width = getRandomInt(1, Drop.MAX_WIDTH);
+            let space = getRandomInt(1, Drop.MAX_SPACE);
+            let height = getRandomInt(1, Drop.MAX_HEIGHT);
+
+            return new Drop(column, center, x, -height, height, width, space, ctx);
+        }
+
+        constructor(column, center, x, y, height, width, space, ctx) {
+            this.column = column; // to use clean()
+            this.center = center; // to know where to place next drop
+            this.x = x;
+            this.y = y;
+            this.height = height;
+            this.width = width;
+            this.space = space;
+            this.ctx = ctx;
+            this.color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+            this.hash = Math.random().toString(20).substr(2, 6);
+        }
+
+        draw() {
+            if (this.y < this.ctx.canvas.height) {
+                this.ctx.lineWidth = this.width;
+                this.ctx.strokeStyle = this.color;
+                this.ctx.beginPath();
+
+                this.ctx.moveTo(this.x, this.y);
+                this.ctx.lineTo(this.x, this.y + this.height);
+
+                this.y += Drop.SPEED.dy;
+
+                this.ctx.closePath();
+                this.ctx.stroke();
+            } else {
+                this.clean();
+            }
+        }
+
+        clean() { delete this.column[this.hash]; }
+
+        isReadyForNewDrop() { return (this.y - this.space) >= 0; }
+    }
+
+    drops = [];
+
+    for (let i = 0; i < NB_COLUMNS ; i++) {
+        let column = {};
+        let x = STEP * (i + 1);
+        let y = 0;
+        let drop = Drop.generate(column, x, x, ctx);
+        drop.y = drop.space;
+        column[drop.hash] = drop;
+
+        drops.push(column);
+    }
+
+    function addNewDrops(drops) {
+        drops.forEach((column) => {
+            let keys = Object.keys(column);
+            let lastDrop = column[keys[keys.length - 1]];
+
+            if (lastDrop.isReadyForNewDrop()) {
+                let followingDrop = Drop.generate(
+                    column,
+                    lastDrop.center,
+                    getRandomInt(
+                        lastDrop.center - (STEP / 2),
+                        lastDrop.center + (STEP / 2)
+                    ),
+                    ctx
+                );
+                column[followingDrop.hash] = followingDrop;
+            }
+        });
+    }
+
+    function rain(drops) {
+        ctx.clearRect(0, 0, cs.width, cs.height);
+
+        drops.forEach((column) => {
+            for (const drop of Object.values(column)) {
+                drop.draw();
+            }
+        });
+
+       ctx.stroke();
+
+        addNewDrops(drops);
+    }
+
+    setInterval(rain, Drop.SPEED.interval, drops);
+</script>
+</html>
