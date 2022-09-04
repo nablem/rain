@@ -15,6 +15,7 @@
 </body>
 <script type="text/javascript">
     function getRandomInt(min, max) { min=Math.ceil(min);max=Math.floor(max);return Math.floor(Math.random()*(max-min+1))+ min; }
+    function getRandomColor() { return "rgb("+getRandomInt(0, 255)+","+getRandomInt(0, 255)+","+getRandomInt(0, 255)+")"; }
 
     let cs = document.querySelector("canvas");
     let ctx = cs.getContext("2d");
@@ -46,7 +47,7 @@
             this.width = width;
             this.space = space;
             this.ctx = ctx;
-            this.color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+            this.color = getRandomColor();
             this.hash = Math.random().toString(20).substr(2, 6);
         }
 
