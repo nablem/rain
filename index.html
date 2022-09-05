@@ -8,10 +8,16 @@
         body {
             overflow: hidden; /* Hide scrollbars */
         }
+        canvas {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body>
-<canvas width="4000" height="2000"></canvas>
+<canvas width="2000" height="1000"></canvas>
 </body>
 <script type="text/javascript">
     function getRandomInt(min, max) { min=Math.ceil(min);max=Math.floor(max);return Math.floor(Math.random()*(max-min+1))+ min; }
@@ -55,15 +61,15 @@
             if (this.y < this.ctx.canvas.height) {
                 this.ctx.lineWidth = this.width;
                 this.ctx.strokeStyle = this.color;
-                this.ctx.beginPath();
 
+                this.ctx.beginPath();
                 this.ctx.moveTo(this.x, this.y);
                 this.ctx.lineTo(this.x, this.y + this.height);
+                this.ctx.closePath();
+
+                this.ctx.stroke();
 
                 this.y += Drop.SPEED.dy;
-
-                this.ctx.closePath();
-                this.ctx.stroke();
             } else {
                 this.clean();
             }
